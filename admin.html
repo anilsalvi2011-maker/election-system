@@ -45,13 +45,33 @@ button{
   margin-top:15px;
   font-weight:bold;
 }
+
+input{
+  width:90%;
+  padding:10px;
+  margin:8px;
+}
 </style>
 
 </head>
 
 <body>
 
-<div class="card">
+<!-- 🔐 LOGIN SCREEN -->
+<div class="card" id="loginBox">
+
+<h2>Principal Login</h2>
+
+<input id="username" placeholder="Enter ID">
+<input id="password" type="password" placeholder="Enter Password">
+
+<button class="open" onclick="login()">Login</button>
+
+</div>
+
+
+<!-- 🎛️ ORIGINAL PANEL (UNCHANGED UI) -->
+<div class="card" id="adminPanel" style="display:none;">
 
 <h2>Headmaster Election Control</h2>
 
@@ -62,37 +82,56 @@ button{
 
 </div>
 
+
 <script>
 
-// 🔁 IMPORTANT: Put your actual script URL here
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzji0t8g8BCndicdTHnBrzfKpfbboqvfvKaHj77UXzs6Z9fwvhmhFKz55oPhTe14_4G/exec";
+// 🔗 SAME SCRIPT URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKyrj6Mr9531Ber_Q2bNWncPxAEVtVALvnE_GU0l6cGh8Jj2qOLor1Bg8JcZihTK2X/exec";
+
+
+// 🔐 LOGIN FUNCTION
+function login(){
+
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+
+  // 👉 CHANGE THESE AS YOU WANT
+  if(user === "principal" && pass === "1234"){
+
+    // Hide login, show panel
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
+  } else {
+    alert("Invalid ID or Password");
+  }
+}
 
 
 // 🟢 START
 async function start(){
-  await fetch(SCRIPT_URL + "?action=open");
+  await fetch(SCRIPT_URL + "?api=1&action=open");
   showMessage("🟢 Election Started - All can vote now");
 }
 
 
 // 🔴 STOP
 async function stop(){
-  await fetch(SCRIPT_URL + "?action=close");
+  await fetch(SCRIPT_URL + "?api=1&action=close");
   showMessage("🔴 Election Closed - Voting disabled");
 }
 
 
-// 💬 NICE MESSAGE (instead of ugly alert)
+// 💬 MESSAGE
 function showMessage(msg){
-  let s = document.getElementById("status");
-  s.innerHTML = msg;
+  document.getElementById("status").innerHTML = msg;
 }
 
 
-// 🔄 LIVE STATUS
+// 🔄 STATUS
 async function check(){
   try{
-    let res = await fetch(SCRIPT_URL);
+    let res = await fetch(SCRIPT_URL + "?api=1");
     let data = await res.json();
 
     let s = document.getElementById("status");
