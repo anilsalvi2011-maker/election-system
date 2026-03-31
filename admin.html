@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Principal Control Panel</title>
+
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(135deg,#eef2f7,#dfe9f3);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+.card{
+  width:350px;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+button{
+  width:90%;
+  padding:12px;
+  margin:8px;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+  color:white;
+  cursor:pointer;
+}
+
+.open{background:#2ecc71;}
+.close{background:#e74c3c;}
+
+#status{
+  margin-top:15px;
+  font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Headmaster Election Control</h2>
+
+<button class="open" onclick="start()">Start Election</button>
+<button class="close" onclick="stop()">Close Election</button>
+
+<div id="status">Checking status...</div>
+
+</div>
+
+<script>
+
+// 🔁 IMPORTANT: Put your actual script URL here
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzji0t8g8BCndicdTHnBrzfKpfbboqvfvKaHj77UXzs6Z9fwvhmhFKz55oPhTe14_4G/exec";
+
+
+// 🟢 START
+async function start(){
+  await fetch(SCRIPT_URL + "?action=open");
+  showMessage("🟢 Election Started - All can vote now");
+}
+
+
+// 🔴 STOP
+async function stop(){
+  await fetch(SCRIPT_URL + "?action=close");
+  showMessage("🔴 Election Closed - Voting disabled");
+}
+
+
+// 💬 NICE MESSAGE (instead of ugly alert)
+function showMessage(msg){
+  let s = document.getElementById("status");
+  s.innerHTML = msg;
+}
+
+
+// 🔄 LIVE STATUS
+async function check(){
+  try{
+    let res = await fetch(SCRIPT_URL);
+    let data = await res.json();
+
+    let s = document.getElementById("status");
+
+    if(data.status === "OPEN"){
+      s.innerHTML = "🟢 Election is OPEN";
+      s.style.color = "green";
+    }else{
+      s.innerHTML = "🔴 Election is CLOSED";
+      s.style.color = "red";
+    }
+
+  }catch(e){
+    document.getElementById("status").innerHTML = "⚠️ Connection issue";
+  }
+}
+
+setInterval(check,2000);
+check();
+
+</script>
+
+</body>
+</html>

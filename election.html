@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Election</title>
+
+<style>
+body{
+font-family:Arial;
+background:#eef2f7;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.box{
+width:350px;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+input{
+width:90%;
+padding:10px;
+margin:10px;
+}
+
+button{
+width:90%;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:5px;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.green{background:#2ecc71;}
+
+.hidden{display:none;}
+
+#vvpat{
+border:1px solid black;
+margin-top:10px;
+padding:10px;
+display:none;
+background:#fffbe6;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h3>Student Council Election 2026-27</h3>
+
+<!-- STATUS -->
+<div id="statusText">Checking election status...</div>
+
+<!-- LOGIN -->
+<div id="login">
+<input id="epic" placeholder="Enter 4-digit EPIC">
+<button class="green" onclick="login()">Proceed</button>
+</div>
+
+<!-- BALLOT -->
+<div id="ballot" class="hidden">
+<button class="green" onclick="vote('🌸 Asha')">🌸 Asha</button>
+<button class="green" onclick="vote('🌳 Rohan')">🌳 Rohan</button>
+<button class="green" onclick="vote('📚 Meena')">📚 Meena</button>
+<button class="green" onclick="vote('❌ NOTA')">❌ NOTA</button>
+</div>
+
+<!-- VVPAT -->
+<div id="vvpat"></div>
+
+</div>
+
+<script>
+
+// 🔗 SAME SCRIPT URL AS ADMIN
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzji0t8g8BCndicdTHnBrzfKpfbboqvfvKaHj77UXzs6Z9fwvhmhFKz55oPhTe14_4G/exec";
+
+let electionOpen = false;
+
+// 🔄 CHECK STATUS
+async function checkStatus(){
+  try{
+    let res = await fetch(SCRIPT_URL);
+    let data = await res.json();
+
+    if(data.status === "OPEN"){
+      electionOpen = true;
+      document.getElementById("statusText").innerHTML = "🟢 Voting is OPEN";
+    } else {
+      electionOpen = false;
+      document.getElementById("statusText").innerHTML = "🔴 Voting is CLOSED";
+      document.getElementById("ballot").classList.add("hidden");
+    }
+
+  }catch(e){
+    electionOpen = false;
+    document.getElementById("statusText").innerHTML = "⚠️ Unable to connect";
+    console.log(e);
+  }
+}
+
+// 🔁 LIVE UPDATE
+setInterval(checkStatus, 2000);
+checkStatus();
+
+
+// 🔑 LOGIN
+function login(){
+
+if(!electionOpen){
+alert("Election is closed");
+return;
+}
+
+let e = document.getElementById("epic").value;
+
+if(e.length != 4){
+alert("Enter valid 4-digit EPIC");
+return;
+}
+
+if(localStorage.getItem("voted_"+e)){
+alert("You have already voted");
+return;
+}
+
+window.user = e;
+
+document.getElementById("login").classList.add("hidden");
+document.getElementById("ballot").classList.remove("hidden");
+}
+
+
+// 🗳️ VOTE
+async function vote(name){
+
+if(!electionOpen){
+alert("Election closed. Try later.");
+return;
+}
+
+try{
+
+let res = await fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+EPIC:user,
+Vote:name
+})
+});
+
+let text = await res.text();
+
+if(text==="ALREADY"){
+alert("Already voted");
+return;
+}
+
+if(text==="CLOSED"){
+alert("Election closed");
+return;
+}
+
+// ✅ SUCCESS
+localStorage.setItem("voted_"+user,"yes");
+
+let v = document.getElementById("vvpat");
+v.style.display="block";
+v.innerHTML = `
+<b>VVPAT Slip</b><br><br>
+You voted for:<br><b>${name}</b>
+`;
+
+let beep = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+beep.play();
+
+setTimeout(()=>location.reload(),3000);
+
+}catch(e){
+alert("Connection error");
+console.log(e);
+}
+
+}
+
+</script>
+
+</body>
+</html>
